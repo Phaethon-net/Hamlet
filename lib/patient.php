@@ -98,13 +98,37 @@ function today_patients($path, $today) {
     return $hits;
 }
 
+// If $q looks like a human date, return its YYYYMMDD form. Otherwise null.
+// Accepted shapes (separator may be / - or .):
+//   dd?mm?yyyy  e.g. 1/1/1900, 21-11-1963, 01.01.1900
+//   yyyy?mm?dd  e.g. 1963-11-21
+// Folder DoBs are stored as YYYYMMDD, so converting before the substring
+// search means a clinician can paste "21/11/1963" into the box and still
+// land on TESTERSON_Testy_19631121.
+function _maybe_date_to_ymd($q) {
+    $q = trim($q);
+    if (preg_match('#^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$#', $q, $m)) {
+        $d = (int)$m[1]; $mo = (int)$m[2]; $y = (int)$m[3];
+        if (checkdate($mo, $d, $y)) return sprintf('%04d%02d%02d', $y, $mo, $d);
+    }
+    if (preg_match('#^(\d{4})[/.\-](\d{1,2})[/.\-](\d{1,2})$#', $q, $m)) {
+        $y = (int)$m[1]; $mo = (int)$m[2]; $d = (int)$m[3];
+        if (checkdate($mo, $d, $y)) return sprintf('%04d%02d%02d', $y, $mo, $d);
+    }
+    return null;
+}
+
 // Case-insensitive substring match on the folder basename. Folder name
-// includes LASTNAME, Firstname and YYYYMMDD DoB so a single substring search
-// covers all three.
+// includes LASTNAME, Firstname and YYYYMMDD DoB so a single substring
+// search covers all three. If the query looks like a date in any common
+// human form, it's first normalised to YYYYMMDD so the substring still
+// matches the on-disk form.
 function search_patients($path, $q) {
     $q = trim($q);
     if ($q === '') return [];
-    $qLower = mb_strtolower($q);
+    $ymd    = _maybe_date_to_ymd($q);
+    $needle = ($ymd !== null) ? $ymd : $q;
+    $qLower = mb_strtolower($needle);
     $hits = [];
     foreach (glob(rtrim($path, "/\\") . '/*', GLOB_ONLYDIR) as $f) {
         $base  = basename($f);
