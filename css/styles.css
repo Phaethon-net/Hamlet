@@ -312,10 +312,6 @@ div.div_list .hint {
     border-color: #ffd84a;
     background: #024;
 }
-.exam-row.eye-od { border-left: 4px solid #6ad06a; }
-.exam-row.eye-os { border-left: 4px solid #6a9ed0; }
-.exam-row.eye-ou { border-left: 4px solid #d0a86a; }
-
 /* "Currently shown in left pane" / "right pane" markers.
    Red = left pane, green = right pane. These colours match the panes
    themselves (see #paneL / #paneR below) so there's a single consistent
