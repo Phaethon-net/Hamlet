@@ -82,6 +82,18 @@ function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
     $leftPdf  = $pdfUrlOf($pair['OD']); // OD on left pane
     $rightPdf = $pdfUrlOf($pair['OS']); // OS on right pane
 
+    // MRN lives in the exam filename, not the folder name. Take the last
+    // underscore-delimited field of the first exam's basename, e.g.
+    //   TES_20221221_161701_OD_84019862_SFA_013571117.pdf  ->  013571117
+    // Folder-level MRN display uses whatever the newest exam has, which
+    // is fine because every exam for a patient shares the same suffix.
+    $mrn = '';
+    if (!empty($exams)) {
+        $stem  = pathinfo($exams[0]['base'], PATHINFO_FILENAME);
+        $parts = explode('_', $stem);
+        $mrn   = end($parts);
+    }
+
     echo "<div class='detail'>";
 
     // Left menu — patient identity sits at the top, then the view-mode
@@ -89,6 +101,9 @@ function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
     echo "<div class='menu-pane'>";
     echo "  <div class='patient-header'>";
     echo "    <div class='namelabel'>" . htmlspecialchars($info['last']) . ", " . htmlspecialchars($info['first']) . "</div>";
+    if ($mrn !== '') {
+        echo "    <div class='mrnlabel'><span class='label'>MRN:</span> " . htmlspecialchars($mrn) . "</div>";
+    }
     echo "    <div class='idlabel'>" . htmlspecialchars($dobFmt) . "</div>";
     echo "  </div>";
 

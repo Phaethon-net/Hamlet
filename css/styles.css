@@ -288,6 +288,16 @@ div.div_list .hint {
     font-weight: bold;
     line-height: 1.15;
 }
+.patient-header .mrnlabel {
+    display: block;
+    font-size: 10pt;
+    color: white;
+    margin-top: 3px;
+}
+.patient-header .mrnlabel .label {
+    color: yellow;
+    font-weight: bold;
+}
 .patient-header .idlabel {
     display: block;
     font-size: 10pt;
