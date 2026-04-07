@@ -97,10 +97,10 @@ function render_patient_detail($folder, $file, $dataURL, $idx) {
         foreach ($exams as $ex) {
             $url = $pdfUrlOf($ex);
             $eyeCls = strtolower($ex['eye']);
-            $isInit = '';
-            if ($pair['OD'] && $ex['base'] === $pair['OD']['base']) $isInit = ' init-l';
-            if ($pair['OS'] && $ex['base'] === $pair['OS']['base']) $isInit = ' init-r';
-            echo "    <div class='exam-row eye-$eyeCls$isInit'"
+            $inPane = '';
+            if ($pair['OD'] && $ex['base'] === $pair['OD']['base']) $inPane .= ' in-pane-l';
+            if ($pair['OS'] && $ex['base'] === $pair['OS']['base']) $inPane .= ' in-pane-r';
+            echo "    <div class='exam-row eye-$eyeCls$inPane'"
                . " data-pdf='" . htmlspecialchars($url, ENT_QUOTES)
                . "' data-name='" . htmlspecialchars($ex['base'], ENT_QUOTES) . "'"
                . " title='Left-click: load left pane &nbsp;&nbsp; Right-click: load right pane'>";

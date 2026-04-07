@@ -14,7 +14,17 @@
         const paneL = document.getElementById('paneL');
         const paneR = document.getElementById('paneR');
 
-        function loadInto(pane, row) {
+        // Marker classes track which exam-row is currently shown in each
+        // pane. We strip the class from any other row before applying it
+        // to the clicked one — without this, the server-rendered initial
+        // pair would stay highlighted even after the user picked something
+        // else.
+        function setPaneMarker(row, klass) {
+            rows.forEach(r => r.classList.remove(klass));
+            if (row) row.classList.add(klass);
+        }
+
+        function loadInto(pane, row, marker) {
             if (!pane || !row) return;
             const url  = row.dataset.pdf;
             const name = row.dataset.name || '';
@@ -23,6 +33,7 @@
             pane.dataset.pdf = url;
             const lbl = pane.querySelector('.pdf-label');
             if (lbl) lbl.textContent = eye + ' · ' + name;
+            setPaneMarker(row, marker);
             if (window.HamletPDF) window.HamletPDF.loadIntoPane(pane, url);
         }
 
@@ -30,12 +41,12 @@
             row.addEventListener('click', function (e) {
                 if (e.button !== 0) return;
                 e.preventDefault();
-                loadInto(paneL, row);
+                loadInto(paneL, row, 'in-pane-l');
             });
             row.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                loadInto(paneR, row);
+                loadInto(paneR, row, 'in-pane-r');
             });
         });
 
