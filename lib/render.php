@@ -44,9 +44,9 @@ function render_patient_list(array $folders, $file) {
         echo "<a class='div_pat' href='$href'>";
         echo "  <div class='row1'>";
         echo "    <span class='namelabel'>" . htmlspecialchars($info['last']) . ", " . htmlspecialchars($info['first']) . "</span>";
-        echo "    <span class='idlabel'>" . htmlspecialchars($dobFmt) . "</span>";
+        echo "    <span class='countlabel'>$count report" . ($count === 1 ? '' : 's') . "</span>";
         echo "  </div>";
-        echo "  <div class='countlabel'>$count report" . ($count === 1 ? '' : 's') . "</div>";
+        echo "  <div class='idlabel'>" . htmlspecialchars($dobFmt) . "</div>";
         echo "</a>";
     }
 }
