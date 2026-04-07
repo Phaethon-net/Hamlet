@@ -348,9 +348,12 @@ div.div_list .hint {
     border: 3px solid #444;
     border-radius: 4px;
     background: #000;
-    overflow: hidden;
+    overflow: auto;      /* allow scrolling when the zoomed canvas overflows */
     min-height: 0;
+    cursor: grab;
 }
+.pdf-pane.dragging { cursor: grabbing; }
+.pdf-pane canvas { user-select: none; }
 
 /* Dual-pane colour coding: red frame = left pane, green frame = right
    pane. The matching sidebar row gets the same colour outline so the
