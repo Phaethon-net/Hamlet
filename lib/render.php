@@ -82,19 +82,33 @@ function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
     $leftPdf  = $pdfUrlOf($pair['OD']); // OD on left pane
     $rightPdf = $pdfUrlOf($pair['OS']); // OS on right pane
 
-    echo "<div class='header'>";
-    echo "  <span class='label'>Name:</span> " . htmlspecialchars($info['last']) . ", " . htmlspecialchars($info['first']);
-    echo "  &nbsp;&nbsp;&nbsp;<span class='label'>DoB</span>: " . htmlspecialchars($dobFmt);
-    echo "</div>";
-
     echo "<div class='detail'>";
 
-    // Left menu
+    // Left menu — patient identity sits at the top, then the view-mode
+    // buttons (including MD and NB), then the scrolling list of exams.
     echo "<div class='menu-pane'>";
+    echo "  <div class='patient-header'>";
+    echo "    <div class='namelabel'>" . htmlspecialchars($info['last']) . ", " . htmlspecialchars($info['first']) . "</div>";
+    echo "    <div class='idlabel'>" . htmlspecialchars($dobFmt) . "</div>";
+    echo "  </div>";
+
+    // View-mode + MD/NB/Export toolbar
+    $modes = [
+        'dual' => 'Dual',
+        'all'  => 'All',
+        'allR' => 'All OD',
+        'allL' => 'All OS',
+        'allO' => 'All OU',
+    ];
+    $base = htmlspecialchars($file) . "?id=" . urlencode($idx);
     echo "  <div class='menu-toolbar'>";
-    echo "    <button id='btn-md'>MD trend</button>";
-    echo "    <button id='btn-nb'>NB notes</button>";
-    echo "    <button id='btn-export'>Export pair</button>";
+    foreach ($modes as $m => $label) {
+        $cls = ($view === $m) ? 'mode-btn active' : 'mode-btn';
+        echo "    <a class='$cls' href='$base&amp;view=$m'>$label</a>";
+    }
+    echo "    <button id='btn-md' class='menu-btn'>MD</button>";
+    echo "    <button id='btn-nb' class='menu-btn'>NB</button>";
+    echo "    <button id='btn-export' class='menu-btn'>Export</button>";
     echo "  </div>";
     if (empty($exams)) {
         echo "  <div class='emptylist'>No exams.</div>";
@@ -126,24 +140,8 @@ function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
     }
     echo "</div>"; // .menu-pane
 
-    // Right-hand presentation area
+    // Right-hand presentation area — full height, no chrome above it.
     echo "<div class='pdf-area'>";
-
-    // Mode toolbar
-    $modes = [
-        'dual' => 'Dual',
-        'all'  => 'All',
-        'allR' => 'All OD',
-        'allL' => 'All OS',
-        'allO' => 'All OU',
-    ];
-    $base = htmlspecialchars($file) . "?id=" . urlencode($idx);
-    echo "  <div class='mode-toolbar'>";
-    foreach ($modes as $m => $label) {
-        $cls = ($view === $m) ? 'mode-btn active' : 'mode-btn';
-        echo "    <a class='$cls' href='$base&amp;view=$m'>$label</a>";
-    }
-    echo "  </div>";
 
     if ($view === 'dual') {
         echo "  <div class='pdf-panes mode-dual'>";

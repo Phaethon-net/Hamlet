@@ -254,7 +254,10 @@ div.div_list .hint {
     display: grid;
     grid-template-columns: 280px 1fr;
     grid-gap: 8px;
-    height: calc(100vh - 250px);
+    /* Fill whatever's left below the banner + index row. 198px is the
+       measured height of those two rows on a standard desktop; slightly
+       generous so the detail panel never causes the page itself to scroll. */
+    height: calc(100vh - 198px);
     min-height: 480px;
     padding: 0 8px 8px;
     box-sizing: border-box;
@@ -267,25 +270,62 @@ div.div_list .hint {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
 }
 
-.menu-toolbar {
-    padding: 6px;
+/* Patient identity at the top of the sidebar (replaces the old centred
+   page-wide header so the PDF panes can use the full remaining height). */
+.patient-header {
+    padding: 8px 10px;
     border-bottom: 1px solid #444;
     text-align: center;
     flex-shrink: 0;
 }
-.menu-toolbar button {
+.patient-header .namelabel {
+    display: block;
+    font-size: 13pt;
+    color: yellow;
+    font-weight: bold;
+    line-height: 1.15;
+}
+.patient-header .idlabel {
+    display: block;
+    font-size: 10pt;
+    color: lightblue;
+    margin-top: 2px;
+}
+
+.menu-toolbar {
+    padding: 6px 4px;
+    border-bottom: 1px solid #444;
+    text-align: center;
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    justify-content: center;
+}
+.menu-toolbar .mode-btn,
+.menu-toolbar .menu-btn {
+    display: inline-block;
     background: #424242;
     color: yellow;
     border: 1px solid yellow;
-    border-radius: 5px;
-    padding: 4px 8px;
-    margin: 2px;
+    border-radius: 4px;
+    padding: 3px 8px;
     cursor: pointer;
     font-size: 9pt;
+    text-decoration: none;
+    line-height: 1.2;
 }
-.menu-toolbar button:hover { background: #024; }
+.menu-toolbar .mode-btn:hover,
+.menu-toolbar .menu-btn:hover { background: #024; }
+.menu-toolbar .mode-btn.active {
+    background: #024;
+    color: #ffd84a;
+    border-color: #ffd84a;
+    font-weight: bold;
+}
 
 .exam-list {
     flex: 1;
@@ -334,8 +374,9 @@ div.div_list .hint {
 .ex-strat { color: lightblue; font-size: 9pt; }
 .ex-when  { color: white; font-size: 9pt; }
 
-/* The right-hand column of .detail holds the mode toolbar above the
-   presentation area. The panes themselves flex to fill what's left. */
+/* The right-hand column of .detail is just the presentation area now;
+   the mode / MD / NB / Export buttons moved into the sidebar toolbar so
+   the PDF panes can fill the full remaining height. */
 .pdf-area {
     display: flex;
     flex-direction: column;
@@ -343,31 +384,7 @@ div.div_list .hint {
     min-width: 0;
 }
 
-.mode-toolbar {
-    display: flex;
-    gap: 4px;
-    padding: 0 0 6px 0;
-    flex-shrink: 0;
-}
-.mode-toolbar .mode-btn {
-    display: inline-block;
-    padding: 4px 12px;
-    color: yellow;
-    background: #424242;
-    border: 1px solid yellow;
-    border-radius: 5px;
-    font-size: 10pt;
-    text-decoration: none;
-}
-.mode-toolbar .mode-btn:hover { background: #024; }
-.mode-toolbar .mode-btn.active {
-    background: #024;
-    color: #ffd84a;
-    border-color: #ffd84a;
-    font-weight: bold;
-}
-
-/* Dual PDF panes */
+/* PDF panes */
 .pdf-panes {
     flex: 1;
     min-height: 0;
