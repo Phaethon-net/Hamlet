@@ -322,17 +322,16 @@ div.div_list .hint {
    cue and no "L"/"R" letter that could be confused with OS/OD. */
 .exam-row.in-pane-l {
     border-color: #e05050;
-    box-shadow: 0 0 0 2px #e05050;
     background: #3a0808;
 }
 .exam-row.in-pane-r {
     border-color: #50c050;
-    box-shadow: 0 0 0 2px #50c050;
     background: #083a08;
 }
 .exam-row.in-pane-l.in-pane-r {
     /* (same exam loaded into both panes — rare, but handle it) */
-    box-shadow: inset 3px 0 0 0 #e05050, inset -3px 0 0 0 #50c050;
+    border-color: #e05050;
+    background: linear-gradient(90deg, #3a0808 0%, #3a0808 50%, #083a08 50%, #083a08 100%);
 }
 
 .ex-eye   { font-weight: bold; color: yellow; }
