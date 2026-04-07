@@ -209,6 +209,17 @@ function wireAllPanes() {
     document.querySelectorAll('.pdf-panes.mode-strip').forEach(wireStripContainer);
 }
 
+// Block the browser's native context menu on the PDF panes. PDF.js renders
+// into <canvas>, so the default right-click menu offers "Save image as..."
+// and defaults to PNG - which is a rasterised snapshot, not the source
+// PDF. Users who want the original file go via the Export button, which
+// streams the real PDF (and its XML companion) out of D:\HVF_Data.
+document.addEventListener('contextmenu', function (e) {
+    if (e.target && e.target.closest && e.target.closest('.pdf-pane')) {
+        e.preventDefault();
+    }
+}, true);
+
 // Horizontal strip container: mouse-wheel scrolls horizontally, left
 // click-drag pans the strip. No zoom — strip panes are always fit-to-height.
 function wireStripContainer(strip) {
