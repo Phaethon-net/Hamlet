@@ -40,10 +40,16 @@ function clearPaneCanvases(paneEl) {
 async function renderDocIntoPane(paneEl, doc) {
     clearPaneCanvases(paneEl);
 
-    // Available viewport inside the pane (excluding the 3px border).
-    const paneH = paneEl.clientHeight - 6;
-    const paneW = paneEl.clientWidth  - 6;
-    if (paneH <= 0 || paneW <= 0) return;
+    // Strip panes fit strictly to height; the pane's width then tracks the
+    // canvas width automatically (flex: 0 0 auto in CSS). Dual panes keep
+    // the fit-height-with-width-fallback behaviour from before.
+    const strip = paneEl.classList.contains('strip-pane');
+    // Use the parent's height for strip panes (their own clientHeight can
+    // be 0 at first render because width:auto makes the flex item collapse
+    // until its content has a size).
+    const paneH = (strip ? (paneEl.parentElement.clientHeight - 6) : (paneEl.clientHeight - 6));
+    const paneW = paneEl.clientWidth - 6;
+    if (paneH <= 0) return;
 
     const zoom = paneZoom.get(paneEl) || 1.0;
 
@@ -52,9 +58,10 @@ async function renderDocIntoPane(paneEl, doc) {
         const v1   = page.getViewport({ scale: 1 });
 
         // Fit-by-height first; drop to fit-by-width if that would overflow
-        // horizontally at zoom 1.0. Zoom then scales the result up/down.
+        // horizontally at zoom 1.0. Strip panes skip the fallback so every
+        // report in the strip shares the same height.
         let baseScale = paneH / v1.height;
-        if (v1.width * baseScale > paneW) {
+        if (!strip && paneW > 0 && v1.width * baseScale > paneW) {
             baseScale = paneW / v1.width;
         }
         const scale = baseScale * zoom;
@@ -147,6 +154,9 @@ function setZoom(paneEl, newZoom, anchorClientX, anchorClientY) {
 function wirePaneInteraction(paneEl) {
     if (paneEl._hamletWired) return;
     paneEl._hamletWired = true;
+    // Strip panes don't get per-pane zoom/drag — the strip container
+    // handles horizontal scroll and click-drag for the whole row.
+    if (paneEl.classList.contains('strip-pane')) return;
 
     // ctrl+wheel = zoom in/out anchored at the cursor. Without ctrl the
     // default scroll behaviour runs — the pane is overflow:auto so that
@@ -196,6 +206,56 @@ function wirePaneInteraction(paneEl) {
 
 function wireAllPanes() {
     document.querySelectorAll('.pdf-pane').forEach(wirePaneInteraction);
+    document.querySelectorAll('.pdf-panes.mode-strip').forEach(wireStripContainer);
+}
+
+// Horizontal strip container: mouse-wheel scrolls horizontally, left
+// click-drag pans the strip. No zoom — strip panes are always fit-to-height.
+function wireStripContainer(strip) {
+    if (strip._hamletWired) return;
+    strip._hamletWired = true;
+
+    strip.addEventListener('wheel', function (e) {
+        if (e.ctrlKey) return;  // leave ctrl+wheel alone (user zoom gesture, no-op here)
+        // Translate vertical wheel into horizontal strip scroll.
+        if (e.deltaY !== 0) {
+            strip.scrollLeft += e.deltaY;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    let dragging = false;
+    let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+    strip.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        if (e.target.closest && e.target.closest('.pdf-label')) return;
+        dragging = true;
+        startX = e.clientX; startY = e.clientY;
+        startLeft = strip.scrollLeft; startTop = strip.scrollTop;
+        strip.classList.add('dragging');
+        e.preventDefault();
+    });
+    window.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        strip.scrollLeft = startLeft - (e.clientX - startX);
+        strip.scrollTop  = startTop  - (e.clientY - startY);
+    });
+    window.addEventListener('mouseup', function () {
+        if (!dragging) return;
+        dragging = false;
+        strip.classList.remove('dragging');
+    });
+}
+
+// Scroll the strip to the strip-pane whose basename matches.
+function scrollStripTo(name) {
+    const strip = document.querySelector('.pdf-panes.mode-strip');
+    if (!strip) return false;
+    const target = strip.querySelector('.strip-pane[data-name="' + CSS.escape(name) + '"]');
+    if (!target) return false;
+    strip.scrollTo({ left: target.offsetLeft - 8, behavior: 'smooth' });
+    return true;
 }
 
 // Re-render on resize so the fit-to-height base stays correct. The
@@ -209,7 +269,7 @@ window.addEventListener('resize', () => {
     }, 150);
 });
 
-window.HamletPDF = { loadIntoPane, loadAllPanes };
+window.HamletPDF = { loadIntoPane, loadAllPanes, scrollStripTo };
 
 function init() {
     wireAllPanes();

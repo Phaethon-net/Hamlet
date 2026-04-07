@@ -9,8 +9,10 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
 
-$idx = isset($_GET['id']) ? (string) $_GET['id'] : '0';
-$q   = isset($_GET['q'])  ? trim((string) $_GET['q']) : '';
+$idx  = isset($_GET['id'])   ? (string) $_GET['id'] : '0';
+$q    = isset($_GET['q'])    ? trim((string) $_GET['q']) : '';
+$view = isset($_GET['view']) ? (string) $_GET['view'] : 'dual';
+if (!in_array($view, ['dual', 'all', 'allR', 'allL', 'allO'], true)) $view = 'dual';
 
 include __DIR__ . '/header.php';
 include __DIR__ . '/banner.php';
@@ -28,7 +30,7 @@ if ($q !== '') {
     $real = realpath($folderPath);
     $root = realpath($path);
     if ($real && $root && strpos($real, $root) === 0 && is_dir($real)) {
-        render_patient_detail($real, $file, $dataURL, $idx);
+        render_patient_detail($real, $file, $dataURL, $idx, $view);
     } else {
         echo "<div class='emptylist'>Unknown patient.</div>";
     }

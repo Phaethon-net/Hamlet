@@ -13,6 +13,7 @@
         const rows = document.querySelectorAll('.exam-row');
         const paneL = document.getElementById('paneL');
         const paneR = document.getElementById('paneR');
+        const stripMode = !!document.querySelector('.pdf-panes.mode-strip');
 
         // Marker classes track which exam-row is currently shown in each
         // pane. We strip the class from any other row before applying it
@@ -38,16 +39,27 @@
         }
 
         rows.forEach(row => {
-            row.addEventListener('click', function (e) {
-                if (e.button !== 0) return;
-                e.preventDefault();
-                loadInto(paneL, row, 'in-pane-l');
-            });
-            row.addEventListener('contextmenu', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                loadInto(paneR, row, 'in-pane-r');
-            });
+            if (stripMode) {
+                // Strip mode: click scrolls the strip to the matching pane.
+                row.addEventListener('click', function (e) {
+                    if (e.button !== 0) return;
+                    e.preventDefault();
+                    if (window.HamletPDF && row.dataset.name) {
+                        window.HamletPDF.scrollStripTo(row.dataset.name);
+                    }
+                });
+            } else {
+                row.addEventListener('click', function (e) {
+                    if (e.button !== 0) return;
+                    e.preventDefault();
+                    loadInto(paneL, row, 'in-pane-l');
+                });
+                row.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    loadInto(paneR, row, 'in-pane-r');
+                });
+            }
         });
 
         // Overlay toggles

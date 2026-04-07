@@ -55,8 +55,14 @@ function render_patient_list(array $folders, $file) {
     }
 }
 
-// Patient detail page: header + dual PDF panes + left menu of all exams.
-function render_patient_detail($folder, $file, $dataURL, $idx) {
+// Patient detail page: header + left menu of exams + a PDF presentation
+// area that can be in any of five modes:
+//   dual  - two pdf panes side by side (OD left, OS right)
+//   all   - horizontal strip of every exam, newest-first, OD-before-OS
+//   allR  - OD only strip
+//   allL  - OS only strip
+//   allO  - OU only strip (binocular / unknown laterality)
+function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
     $base = basename($folder);
     $info = parse_folder($base);
     $dobFmt = '';
@@ -98,12 +104,19 @@ function render_patient_detail($folder, $file, $dataURL, $idx) {
             $url = $pdfUrlOf($ex);
             $eyeCls = strtolower($ex['eye']);
             $inPane = '';
-            if ($pair['OD'] && $ex['base'] === $pair['OD']['base']) $inPane .= ' in-pane-l';
-            if ($pair['OS'] && $ex['base'] === $pair['OS']['base']) $inPane .= ' in-pane-r';
+            // Only in dual mode does the "currently shown in pane L/R" cue
+            // make sense — the strip modes show every exam at once.
+            if ($view === 'dual') {
+                if ($pair['OD'] && $ex['base'] === $pair['OD']['base']) $inPane .= ' in-pane-l';
+                if ($pair['OS'] && $ex['base'] === $pair['OS']['base']) $inPane .= ' in-pane-r';
+            }
+            $title = ($view === 'dual')
+                ? 'Left-click: load left pane &nbsp;&nbsp; Right-click: load right pane'
+                : 'Click to scroll the strip to this exam';
             echo "    <div class='exam-row eye-$eyeCls$inPane'"
                . " data-pdf='" . htmlspecialchars($url, ENT_QUOTES)
                . "' data-name='" . htmlspecialchars($ex['base'], ENT_QUOTES) . "'"
-               . " title='Left-click: load left pane &nbsp;&nbsp; Right-click: load right pane'>";
+               . " title='$title'>";
             echo      "<span class='ex-eye'>" . htmlspecialchars($ex['eye']) . "</span>";
             echo      "<span class='ex-strat'>" . htmlspecialchars($ex['strategy']) . "</span>";
             echo      "<span class='ex-when'>" . htmlspecialchars(substr($ex['date'],0,4) . '-' . substr($ex['date'],4,2) . '-' . substr($ex['date'],6,2) . ' ' . substr($ex['time'],0,2) . ':' . substr($ex['time'],2,2)) . "</span>";
@@ -113,16 +126,52 @@ function render_patient_detail($folder, $file, $dataURL, $idx) {
     }
     echo "</div>"; // .menu-pane
 
-    // Dual PDF panes
-    echo "<div class='pdf-panes'>";
-    echo "  <div class='pdf-pane' id='paneL' data-pdf='" . htmlspecialchars($leftPdf, ENT_QUOTES) . "'>";
-    echo "    <div class='pdf-label'>" . ($pair['OD'] ? 'OD &middot; ' . htmlspecialchars($pair['OD']['label']) : 'No OD') . "</div>";
-    echo "  </div>";
-    echo "  <div class='pdf-pane' id='paneR' data-pdf='" . htmlspecialchars($rightPdf, ENT_QUOTES) . "'>";
-    echo "    <div class='pdf-label'>" . ($pair['OS'] ? 'OS &middot; ' . htmlspecialchars($pair['OS']['label']) : 'No OS') . "</div>";
-    echo "  </div>";
-    echo "</div>"; // .pdf-panes
+    // Right-hand presentation area
+    echo "<div class='pdf-area'>";
 
+    // Mode toolbar
+    $modes = [
+        'dual' => 'Dual',
+        'all'  => 'All',
+        'allR' => 'All OD',
+        'allL' => 'All OS',
+        'allO' => 'All OU',
+    ];
+    $base = htmlspecialchars($file) . "?id=" . urlencode($idx);
+    echo "  <div class='mode-toolbar'>";
+    foreach ($modes as $m => $label) {
+        $cls = ($view === $m) ? 'mode-btn active' : 'mode-btn';
+        echo "    <a class='$cls' href='$base&amp;view=$m'>$label</a>";
+    }
+    echo "  </div>";
+
+    if ($view === 'dual') {
+        echo "  <div class='pdf-panes mode-dual'>";
+        echo "    <div class='pdf-pane' id='paneL' data-pdf='" . htmlspecialchars($leftPdf, ENT_QUOTES) . "'>";
+        echo "      <div class='pdf-label'>" . ($pair['OD'] ? 'OD &middot; ' . htmlspecialchars($pair['OD']['label']) : 'No OD') . "</div>";
+        echo "    </div>";
+        echo "    <div class='pdf-pane' id='paneR' data-pdf='" . htmlspecialchars($rightPdf, ENT_QUOTES) . "'>";
+        echo "      <div class='pdf-label'>" . ($pair['OS'] ? 'OS &middot; ' . htmlspecialchars($pair['OS']['label']) : 'No OS') . "</div>";
+        echo "    </div>";
+        echo "  </div>";
+    } else {
+        $stripExams = exams_for_mode($exams, $view);
+        echo "  <div class='pdf-panes mode-strip'>";
+        if (empty($stripExams)) {
+            echo "    <div class='emptylist'>No exams in this view.</div>";
+        } else {
+            foreach ($stripExams as $ex) {
+                $url = $pdfUrlOf($ex);
+                echo "    <div class='pdf-pane strip-pane' data-pdf='" . htmlspecialchars($url, ENT_QUOTES)
+                   . "' data-name='" . htmlspecialchars($ex['base'], ENT_QUOTES) . "'>";
+                echo "      <div class='pdf-label'>" . htmlspecialchars($ex['eye'] . ' · ' . $ex['label']) . "</div>";
+                echo "    </div>";
+            }
+        }
+        echo "  </div>";
+    }
+
+    echo "</div>"; // .pdf-area
     echo "</div>"; // .detail
 
     // MD overlay (Google Charts)

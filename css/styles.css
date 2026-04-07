@@ -334,14 +334,59 @@ div.div_list .hint {
 .ex-strat { color: lightblue; font-size: 9pt; }
 .ex-when  { color: white; font-size: 9pt; }
 
+/* The right-hand column of .detail holds the mode toolbar above the
+   presentation area. The panes themselves flex to fill what's left. */
+.pdf-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+}
+
+.mode-toolbar {
+    display: flex;
+    gap: 4px;
+    padding: 0 0 6px 0;
+    flex-shrink: 0;
+}
+.mode-toolbar .mode-btn {
+    display: inline-block;
+    padding: 4px 12px;
+    color: yellow;
+    background: #424242;
+    border: 1px solid yellow;
+    border-radius: 5px;
+    font-size: 10pt;
+    text-decoration: none;
+}
+.mode-toolbar .mode-btn:hover { background: #024; }
+.mode-toolbar .mode-btn.active {
+    background: #024;
+    color: #ffd84a;
+    border-color: #ffd84a;
+    font-weight: bold;
+}
+
 /* Dual PDF panes */
 .pdf-panes {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+.pdf-panes.mode-dual {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 6px;
-    height: 100%;
-    min-height: 0;
 }
+.pdf-panes.mode-strip {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    cursor: grab;
+}
+.pdf-panes.mode-strip.dragging { cursor: grabbing; }
 
 .pdf-pane {
     position: relative;
@@ -357,14 +402,27 @@ div.div_list .hint {
 
 /* Dual-pane colour coding: red frame = left pane, green frame = right
    pane. The matching sidebar row gets the same colour outline so the
-   user can see at a glance which report is where. */
-#paneL {
+   user can see at a glance which report is where. Only applies in dual
+   mode — strip panes stay neutral. */
+.mode-dual #paneL {
     border-color: #e05050;
     background: #3a0808;
 }
-#paneR {
+.mode-dual #paneR {
     border-color: #50c050;
     background: #083a08;
+}
+
+/* Strip-mode panes: fixed height, auto-width sized by the canvas they
+   contain, neutral colour. Each pane keeps its own scroll behaviour
+   disabled (overflow:hidden) — horizontal scrolling is on the strip
+   container, not the individual panes. */
+.pdf-panes.mode-strip .pdf-pane {
+    flex: 0 0 auto;
+    height: 100%;
+    width: auto;
+    overflow: hidden;
+    cursor: inherit;
 }
 
 .pdf-pane canvas {
@@ -384,8 +442,9 @@ div.div_list .hint {
     border-radius: 3px;
     pointer-events: none;
 }
-#paneL .pdf-label { color: #ff9090; border: 1px solid #e05050; }
-#paneR .pdf-label { color: #90e090; border: 1px solid #50c050; }
+.mode-dual #paneL .pdf-label { color: #ff9090; border: 1px solid #e05050; }
+.mode-dual #paneR .pdf-label { color: #90e090; border: 1px solid #50c050; }
+.mode-strip .pdf-pane .pdf-label { color: #ffd84a; border: 1px solid #ffd84a; }
 
 /* Overlays (MD trend, NB notes) */
 .overlay {

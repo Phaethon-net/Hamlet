@@ -117,8 +117,36 @@ function search_patients($path, $q) {
     return $hits;
 }
 
-// All exams in a patient folder, sorted newest-first. Each entry contains
-// both PDF and XML paths (xml may be null if absent) plus parsed metadata.
+// Canonical sort used across the sidebar and the strip views:
+//   - newest date first
+//   - within a date: OD before OS before OU (clinical convention)
+//   - within a date+eye: newest time first
+function sort_exams_clinical(array &$exams) {
+    $eyeRank = ['OD' => 0, 'OS' => 1, 'OU' => 2];
+    usort($exams, function ($a, $b) use ($eyeRank) {
+        if ($a['date'] !== $b['date']) return strcmp($b['date'], $a['date']);
+        $ra = $eyeRank[$a['eye']] ?? 9;
+        $rb = $eyeRank[$b['eye']] ?? 9;
+        if ($ra !== $rb) return $ra - $rb;
+        return strcmp($b['time'], $a['time']);
+    });
+}
+
+// Filter + sort exams for a given presentation mode.
+//   dual / all -> every exam
+//   allR       -> OD only
+//   allL       -> OS only
+//   allO       -> OU only (binocular / unknown laterality)
+function exams_for_mode(array $exams, $mode) {
+    if ($mode === 'allR') $exams = array_values(array_filter($exams, function ($e) { return $e['eye'] === 'OD'; }));
+    if ($mode === 'allL') $exams = array_values(array_filter($exams, function ($e) { return $e['eye'] === 'OS'; }));
+    if ($mode === 'allO') $exams = array_values(array_filter($exams, function ($e) { return $e['eye'] === 'OU'; }));
+    sort_exams_clinical($exams);
+    return $exams;
+}
+
+// All exams in a patient folder. Sorted newest-first with OD-before-OS
+// within each date, matching the strip view.
 function list_patient_exams($folderPath) {
     $out = [];
     foreach (_list_ext($folderPath, 'pdf') as $pdfPath) {
@@ -147,8 +175,7 @@ function list_patient_exams($folderPath) {
             'sortkey'  => $info['date'] . $info['time'],
         ];
     }
-    // Newest first
-    usort($out, function ($a, $b) { return strcmp($b['sortkey'], $a['sortkey']); });
+    sort_exams_clinical($out);
     return $out;
 }
 
