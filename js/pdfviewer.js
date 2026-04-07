@@ -209,15 +209,74 @@ function wireAllPanes() {
     document.querySelectorAll('.pdf-panes.mode-strip').forEach(wireStripContainer);
 }
 
-// Block the browser's native context menu on the PDF panes. PDF.js renders
-// into <canvas>, so the default right-click menu offers "Save image as..."
-// and defaults to PNG - which is a rasterised snapshot, not the source
-// PDF. Users who want the original file go via the Export button, which
-// streams the real PDF (and its XML companion) out of D:\HVF_Data.
+// Custom right-click menu for the PDF panes. PDF.js renders into a
+// <canvas>, so the browser's default menu offers "Save image as..." and
+// dumps a PNG rasterisation - which is lossy and misleading. Swallow
+// that menu and put up our own one-item menu that downloads the real
+// source PDF.
+let pdfCtxMenu = null;
+function hidePdfContextMenu() {
+    if (pdfCtxMenu) { pdfCtxMenu.remove(); pdfCtxMenu = null; }
+    document.removeEventListener('keydown', pdfCtxEscHandler);
+}
+function pdfCtxEscHandler(e) {
+    if (e.key === 'Escape') hidePdfContextMenu();
+}
+function showPdfContextMenu(x, y, pane) {
+    hidePdfContextMenu();
+    const url = pane.dataset.pdf;
+    if (!url) return;
+    const name = pane.dataset.name
+        || decodeURIComponent(url.substring(url.lastIndexOf('/') + 1));
+
+    const menu = document.createElement('div');
+    menu.className = 'pdf-ctx-menu';
+
+    const save = document.createElement('div');
+    save.className = 'pdf-ctx-item';
+    const caption = document.createElement('div');
+    caption.textContent = 'Save original PDF';
+    const sub = document.createElement('div');
+    sub.className = 'pdf-ctx-name';
+    sub.textContent = name;
+    save.appendChild(caption);
+    save.appendChild(sub);
+    menu.appendChild(save);
+
+    save.addEventListener('click', function () {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        hidePdfContextMenu();
+    });
+
+    document.body.appendChild(menu);
+    // Position: clamp to viewport so the menu is never off-screen.
+    const mw = menu.offsetWidth, mh = menu.offsetHeight;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    menu.style.left = Math.min(x, vw - mw - 4) + 'px';
+    menu.style.top  = Math.min(y, vh - mh - 4) + 'px';
+    pdfCtxMenu = menu;
+
+    // Dismiss on next click / right-click / Esc.
+    setTimeout(function () {
+        document.addEventListener('mousedown', function onDown(e) {
+            if (pdfCtxMenu && !pdfCtxMenu.contains(e.target)) {
+                hidePdfContextMenu();
+                document.removeEventListener('mousedown', onDown, true);
+            }
+        }, true);
+        document.addEventListener('keydown', pdfCtxEscHandler);
+    }, 0);
+}
 document.addEventListener('contextmenu', function (e) {
-    if (e.target && e.target.closest && e.target.closest('.pdf-pane')) {
-        e.preventDefault();
-    }
+    const pane = e.target && e.target.closest && e.target.closest('.pdf-pane');
+    if (!pane) return;
+    e.preventDefault();
+    showPdfContextMenu(e.clientX, e.clientY, pane);
 }, true);
 
 // Horizontal strip container: mouse-wheel scrolls horizontally, left

@@ -95,39 +95,6 @@
             }
         });
 
-        // Export the two currently displayed PDFs
-        const btnExport = document.getElementById('btn-export');
-        if (btnExport) {
-            btnExport.addEventListener('click', function () {
-                const idx = (window.HAMLET && window.HAMLET.idx) || '';
-                const baseURL = (window.HAMLET && window.HAMLET.baseURL) || '/Hamlet/';
-                if (!idx) return;
-                const files = [];
-                [paneL, paneR].forEach(p => {
-                    if (!p || !p.dataset.pdf) return;
-                    // The URL ends in /<encoded basename>; strip the path.
-                    const u = p.dataset.pdf;
-                    const base = decodeURIComponent(u.substring(u.lastIndexOf('/') + 1));
-                    if (base) files.push(base);
-                });
-                if (!files.length) return;
-
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = baseURL.replace(/\/+$/, '/') + 'export.php';
-                const idxIn = document.createElement('input');
-                idxIn.type  = 'hidden'; idxIn.name = 'idx'; idxIn.value = idx;
-                form.appendChild(idxIn);
-                files.forEach(name => {
-                    const f = document.createElement('input');
-                    f.type = 'hidden'; f.name = 'files[]'; f.value = name;
-                    form.appendChild(f);
-                });
-                document.body.appendChild(form);
-                form.submit();
-                document.body.removeChild(form);
-            });
-        }
     }
 
     if (document.readyState === 'loading') {

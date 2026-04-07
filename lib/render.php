@@ -108,7 +108,6 @@ function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
     }
     echo "    <button id='btn-md' class='menu-btn'>MD</button>";
     echo "    <button id='btn-nb' class='menu-btn'>NB</button>";
-    echo "    <button id='btn-export' class='menu-btn'>Export</button>";
     echo "  </div>";
     if (empty($exams)) {
         echo "  <div class='emptylist'>No exams.</div>";
@@ -144,11 +143,13 @@ function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
     echo "<div class='pdf-area'>";
 
     if ($view === 'dual') {
+        $lName = $pair['OD'] ? htmlspecialchars($pair['OD']['base'], ENT_QUOTES) : '';
+        $rName = $pair['OS'] ? htmlspecialchars($pair['OS']['base'], ENT_QUOTES) : '';
         echo "  <div class='pdf-panes mode-dual'>";
-        echo "    <div class='pdf-pane' id='paneL' data-pdf='" . htmlspecialchars($leftPdf, ENT_QUOTES) . "'>";
+        echo "    <div class='pdf-pane' id='paneL' data-pdf='" . htmlspecialchars($leftPdf, ENT_QUOTES) . "' data-name='$lName'>";
         echo "      <div class='pdf-label'>" . ($pair['OD'] ? 'OD &middot; ' . htmlspecialchars($pair['OD']['label']) : 'No OD') . "</div>";
         echo "    </div>";
-        echo "    <div class='pdf-pane' id='paneR' data-pdf='" . htmlspecialchars($rightPdf, ENT_QUOTES) . "'>";
+        echo "    <div class='pdf-pane' id='paneR' data-pdf='" . htmlspecialchars($rightPdf, ENT_QUOTES) . "' data-name='$rName'>";
         echo "      <div class='pdf-label'>" . ($pair['OS'] ? 'OS &middot; ' . htmlspecialchars($pair['OS']['label']) : 'No OS') . "</div>";
         echo "    </div>";
         echo "  </div>";

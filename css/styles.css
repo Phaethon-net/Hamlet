@@ -463,6 +463,37 @@ div.div_list .hint {
 .mode-dual #paneR .pdf-label { color: #90e090; border: 1px solid #50c050; }
 .mode-strip .pdf-pane .pdf-label { color: #ffd84a; border: 1px solid #ffd84a; }
 
+/* Custom PDF-pane right-click menu ("Save original PDF") */
+.pdf-ctx-menu {
+    position: fixed;
+    z-index: 10100;
+    background: #013;
+    border: 1px solid #ffd84a;
+    border-radius: 4px;
+    padding: 4px 0;
+    min-width: 200px;
+    max-width: 360px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    color: yellow;
+    user-select: none;
+}
+.pdf-ctx-item {
+    padding: 6px 14px;
+    cursor: pointer;
+}
+.pdf-ctx-item:hover {
+    background: #024;
+    color: #ffd84a;
+}
+.pdf-ctx-item .pdf-ctx-name {
+    color: lightblue;
+    font-size: 8pt;
+    margin-top: 2px;
+    word-break: break-all;
+}
+
 /* Overlays (MD trend, NB notes) */
 .overlay {
     position: fixed;
