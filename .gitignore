@@ -1,0 +1,21 @@
+# Local prompt / scratch
+Hamlet_Prompt.txt
+
+# Claude Code local session state
+.claude/
+
+# Editor / OS noise
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Local PHP session / temp output
+sessions/
+tmp/

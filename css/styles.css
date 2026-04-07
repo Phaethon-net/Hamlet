@@ -1,0 +1,413 @@
+/* Hamlet — palette and base styling lifted from Othello, with HVF-specific
+   menu + dual-pane PDF layout appended. No PView overlay, no viewer toggle,
+   no thumbnail grid. */
+
+html, body{
+    height: 100%;
+    border: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    text-align: left;
+    background-color: #024;
+    color: white;
+    min-width: 950px;
+    margin: 0;
+}
+
+a{
+    display: inline-block;
+    color: white;
+    text-decoration: none;
+}
+a:visited{
+    display: inline-block;
+    color: lightgreen;
+    text-decoration: none;
+}
+
+button{
+    padding: 5px 10px;
+}
+
+span.label{
+    font-weight: bold;
+    color: yellow;
+}
+
+span.namelabel{
+    font-size: 12px;
+    font-weight: bold;
+    color: yellow;
+    text-align: left;
+}
+
+span.idlabel{
+    font-size: 10px;
+    font-weight: normal;
+    color: lightblue;
+    text-align: left;
+}
+
+.header{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 22px;
+    text-align: center;
+    color: white;
+    width: 100%;
+    margin: 6px 0;
+}
+
+/* Index row (TODAY / A-Z / search) */
+#index {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#index hr {
+    width: 100%;
+}
+
+#index .index {
+    color: yellow;
+    font-size: 13pt;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 2px 2px;
+    margin: 2px;
+    width: 18px;
+    text-align: center;
+    background-color: #424242;
+}
+
+#index .index0 {
+    color: yellow;
+    font-size: 13pt;
+    border-style: solid;
+    border-color: yellow;
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 2px 3px;
+    margin: 2px;
+    width: 64px;
+    text-align: center;
+    background-color: #424242;
+}
+
+#index .index.active, #index .index0.active {
+    background-color: #024;
+    color: #ffd84a;
+    border-color: #ffd84a;
+}
+
+.searchform {
+    display: inline-flex;
+    align-items: center;
+    margin: 2px 2px 2px 8px;
+    padding: 0;
+}
+.searchform input[type=text] {
+    background-color: #424242;
+    color: yellow;
+    border: 1px solid yellow;
+    border-radius: 5px;
+    padding: 4px 6px;
+    font-size: 11pt;
+    width: 220px;
+    outline: none;
+}
+.searchform input[type=text]::placeholder {
+    color: #b8b06b;
+    font-style: italic;
+}
+.searchform .clearq {
+    background: transparent;
+    color: yellow;
+    border: 1px solid yellow;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    line-height: 18px;
+    font-size: 14pt;
+    margin-left: 4px;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Banner */
+.banner-content {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    vertical-align: middle;
+}
+
+.banner-left {
+    position: relative;
+    display: inline-block;
+    width: 600px;
+}
+
+.title-script {
+    font-size: 64pt;
+    font-family: 'Brush Script MT', cursive;
+    color: #e4dd84;
+}
+
+.title-plain {
+    font-size: 36pt;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #ffffff;
+}
+
+.banner-right {
+    position: relative;
+    display: inline-block;
+    float: right;
+    top: 0;
+    width: 140px;
+    text-align: center;
+}
+
+.phaethon {
+    font-size: 12pt;
+    font-family: 'Brush Script MT', cursive;
+    color: yellow;
+    text-align: center;
+}
+
+.version {
+    font-size: 8pt;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    text-align: center;
+}
+
+/* Patient list cards */
+div.div_wrap {
+    color: green;
+    font-size: 8pt;
+    padding: 2px 3px;
+    margin: 2px;
+    text-align: center;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+}
+
+div.div_pat {
+    color: yellow;
+    font-size: 10pt;
+    border-style: solid;
+    border-color: yellow;
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 6px 8px;
+    margin: 2px;
+    width: 250px;
+    text-align: left;
+    float: left;
+}
+
+div.div_list {
+    color: yellow;
+    font-size: 9pt;
+    padding: 8px;
+    margin: 2px;
+    text-align: left;
+    float: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+div.div_list a.datepill {
+    color: yellow;
+    font-size: 10pt;
+    border: 1px solid white;
+    border-radius: 5px;
+    padding: 6px 12px;
+    text-align: left;
+    width: max-content;
+}
+div.div_list a.datepill:hover {
+    background-color: #024;
+    border-color: #ffd84a;
+    color: #ffd84a;
+}
+
+div.div_list .hint {
+    color: #9ec0e0;
+    font-size: 9pt;
+    margin-left: 4px;
+}
+
+.emptylist {
+    padding: 24px;
+    color: #b0b0b0;
+    font-style: italic;
+}
+
+/* ===== Patient detail (HVF dual-pane) ============================= */
+
+.detail {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-gap: 8px;
+    height: calc(100vh - 250px);
+    min-height: 480px;
+    padding: 0 8px 8px;
+    box-sizing: border-box;
+}
+
+.menu-pane {
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #013;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.menu-toolbar {
+    padding: 6px;
+    border-bottom: 1px solid #444;
+    text-align: center;
+    flex-shrink: 0;
+}
+.menu-toolbar button {
+    background: #424242;
+    color: yellow;
+    border: 1px solid yellow;
+    border-radius: 5px;
+    padding: 4px 8px;
+    margin: 2px;
+    cursor: pointer;
+    font-size: 9pt;
+}
+.menu-toolbar button:hover { background: #024; }
+
+.exam-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.exam-row {
+    display: grid;
+    grid-template-columns: 32px 38px 1fr;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    margin: 2px 0;
+    border: 1px solid #335;
+    border-radius: 4px;
+    background: #012;
+    cursor: pointer;
+    font-size: 10pt;
+    color: white;
+    user-select: none;
+}
+.exam-row:hover {
+    border-color: #ffd84a;
+    background: #024;
+}
+.exam-row.eye-od { border-left: 4px solid #6ad06a; }
+.exam-row.eye-os { border-left: 4px solid #6a9ed0; }
+.exam-row.eye-ou { border-left: 4px solid #d0a86a; }
+.exam-row.init-l { box-shadow: inset 0 0 0 2px #6ad06a; }
+.exam-row.init-r { box-shadow: inset 0 0 0 2px #6a9ed0; }
+.exam-row.init-l.init-r { box-shadow: inset 0 0 0 2px #ffd84a; }
+
+.ex-eye   { font-weight: bold; color: yellow; }
+.ex-strat { color: lightblue; font-size: 9pt; }
+.ex-when  { color: white; font-size: 9pt; }
+
+/* Dual PDF panes */
+.pdf-panes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 6px;
+    height: 100%;
+    min-height: 0;
+}
+
+.pdf-pane {
+    position: relative;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #000;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.pdf-pane canvas {
+    display: block;
+    margin: 0 auto;
+    background: #fff;
+}
+
+.pdf-pane .pdf-label {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    z-index: 5;
+    background: rgba(0,0,0,0.55);
+    color: #ffd84a;
+    font-size: 9pt;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid #ffd84a;
+    pointer-events: none;
+}
+
+/* Overlays (MD trend, NB notes) */
+.overlay {
+    position: fixed;
+    display: none;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 10000;
+}
+.overlay.show { display: block; }
+.overlay-inner {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    right: 5%;
+    bottom: 5%;
+    background: #fff;
+    color: #222;
+    border: 2px solid #ffd84a;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+.overlay-header {
+    padding: 10px 16px;
+    background: #024;
+    color: #ffd84a;
+    font-size: 14pt;
+    border-bottom: 1px solid #444;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.overlay-close {
+    cursor: pointer;
+    font-size: 22pt;
+    color: #ff8888;
+    line-height: 1;
+}
+.overlay-body {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+.md-chart {
+    width: 800px;
+    max-width: 100%;
+    height: 360px;
+    margin: 0 auto 16px;
+}

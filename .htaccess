@@ -1,0 +1,39 @@
+# Apache configuration for Hamlet.
+#
+# - Static assets (.css, .js, .mjs, favicon, fonts) are cached for one year
+#   as immutable. Combined with the ?v=<filemtime> query string emitted by
+#   header.php, this means: a fresh push gives every asset a new URL,
+#   which is a cache miss everywhere (browser, corporate proxy, CDN);
+#   once fetched it never has to be re-validated.
+#
+# - The HTML page itself (index.php) is left to PHP, which sends
+#   Cache-Control: no-cache, no-store, must-revalidate from the top of
+#   index.php. export.php sets its own Content-Disposition header.
+#
+# IIS users: this file is ignored. See web.config instead.
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|mjs|ico|woff2?|ttf|eot|svg)$">
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </FilesMatch>
+
+  # Basic security headers — cheap, harmless on a closed network.
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy        "same-origin"
+</IfModule>
+
+# Make sure .mjs is served with the correct MIME type for ES module loading.
+<IfModule mod_mime.c>
+  AddType text/javascript .mjs
+</IfModule>
+
+# Block direct download of config / docs / dotfiles.
+<FilesMatch "\.(ini|md|log)$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+DirectoryIndex index.php
