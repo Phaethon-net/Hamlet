@@ -316,40 +316,23 @@ div.div_list .hint {
 .exam-row.eye-os { border-left: 4px solid #6a9ed0; }
 .exam-row.eye-ou { border-left: 4px solid #d0a86a; }
 
-/* "Currently shown in left pane" / "right pane" markers. Distinct from
-   the OD/OS eye colour so the two cues don't fight each other. */
+/* "Currently shown in left pane" / "right pane" markers.
+   Red = left pane, green = right pane. These colours match the panes
+   themselves (see #paneL / #paneR below) so there's a single consistent
+   cue and no "L"/"R" letter that could be confused with OS/OD. */
 .exam-row.in-pane-l {
-    background: #013a5a;
-    border-color: #ffd84a;
-    box-shadow: inset 3px 0 0 0 #ffd84a;
+    border-color: #e05050;
+    box-shadow: 0 0 0 2px #e05050;
+    background: #3a0808;
 }
 .exam-row.in-pane-r {
-    background: #013a5a;
-    border-color: #ffa54a;
-    box-shadow: inset -3px 0 0 0 #ffa54a;
+    border-color: #50c050;
+    box-shadow: 0 0 0 2px #50c050;
+    background: #083a08;
 }
 .exam-row.in-pane-l.in-pane-r {
-    box-shadow: inset 3px 0 0 0 #ffd84a, inset -3px 0 0 0 #ffa54a;
-}
-/* A tiny corner pip so the cue is unambiguous even on a colour-blind display */
-.exam-row { position: relative; }
-.exam-row.in-pane-l::before {
-    content: 'L';
-    position: absolute;
-    top: 1px; left: 6px;
-    font-size: 7pt;
-    color: #ffd84a;
-    font-weight: bold;
-    line-height: 1;
-}
-.exam-row.in-pane-r::after {
-    content: 'R';
-    position: absolute;
-    top: 1px; right: 6px;
-    font-size: 7pt;
-    color: #ffa54a;
-    font-weight: bold;
-    line-height: 1;
+    /* (same exam loaded into both panes — rare, but handle it) */
+    box-shadow: inset 3px 0 0 0 #e05050, inset -3px 0 0 0 #50c050;
 }
 
 .ex-eye   { font-weight: bold; color: yellow; }
@@ -367,11 +350,23 @@ div.div_list .hint {
 
 .pdf-pane {
     position: relative;
-    border: 1px solid #444;
+    border: 3px solid #444;
     border-radius: 4px;
     background: #000;
     overflow: hidden;
     min-height: 0;
+}
+
+/* Dual-pane colour coding: red frame = left pane, green frame = right
+   pane. The matching sidebar row gets the same colour outline so the
+   user can see at a glance which report is where. */
+#paneL {
+    border-color: #e05050;
+    background: #3a0808;
+}
+#paneR {
+    border-color: #50c050;
+    background: #083a08;
 }
 
 .pdf-pane canvas {
@@ -385,14 +380,14 @@ div.div_list .hint {
     top: 4px;
     left: 4px;
     z-index: 5;
-    background: rgba(0,0,0,0.55);
-    color: #ffd84a;
+    background: rgba(0,0,0,0.7);
     font-size: 9pt;
     padding: 2px 8px;
     border-radius: 3px;
-    border: 1px solid #ffd84a;
     pointer-events: none;
 }
+#paneL .pdf-label { color: #ff9090; border: 1px solid #e05050; }
+#paneR .pdf-label { color: #90e090; border: 1px solid #50c050; }
 
 /* Overlays (MD trend, NB notes) */
 .overlay {
