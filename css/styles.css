@@ -184,62 +184,44 @@ span.idlabel{
     text-align: center;
 }
 
-/* Patient list cards */
-div.div_wrap {
-    color: green;
-    font-size: 8pt;
-    padding: 2px 3px;
-    margin: 2px;
-    text-align: center;
-    display: grid;
-    grid-template-columns: 260px 1fr;
-}
-
-div.div_pat {
+/* Patient list cards — single clickable block per patient. */
+a.div_pat {
+    display: block;
     color: yellow;
     font-size: 10pt;
-    border-style: solid;
-    border-color: yellow;
-    border-width: 1px;
-    border-radius: 5px;
-    padding: 6px 8px;
-    margin: 2px;
-    width: 250px;
-    text-align: left;
-    float: left;
-}
-
-div.div_list {
-    color: yellow;
-    font-size: 9pt;
-    padding: 8px;
-    margin: 2px;
-    text-align: left;
-    float: left;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-div.div_list a.datepill {
-    color: yellow;
-    font-size: 10pt;
-    border: 1px solid white;
+    border: 1px solid yellow;
     border-radius: 5px;
     padding: 6px 12px;
+    margin: 4px 8px;
+    max-width: 700px;
     text-align: left;
-    width: max-content;
+    text-decoration: none;
+    cursor: pointer;
+    line-height: 1.3;
 }
-div.div_list a.datepill:hover {
-    background-color: #024;
+a.div_pat:visited { color: yellow; }
+a.div_pat:hover {
+    background: #024;
     border-color: #ffd84a;
-    color: #ffd84a;
 }
-
-div.div_list .hint {
+a.div_pat .row1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+}
+a.div_pat .namelabel {
+    font-weight: bold;
+    color: yellow;
+}
+a.div_pat .idlabel {
+    color: lightblue;
+    font-size: 9pt;
+}
+a.div_pat .countlabel {
     color: #9ec0e0;
     font-size: 9pt;
-    margin-left: 4px;
+    margin-top: 1px;
 }
 
 .emptylist {

@@ -20,6 +20,11 @@ function render_index_row($file, $currentIdx, $currentQ) {
 }
 
 // Patient list cards used by TODAY / alphabetic / search results.
+// Each card is a single clickable block: name + DoB on line one, a
+// "N reports" count on line two. The count is deliberately labelled
+// "reports" (not "exams") because a single clinical exam may cover one
+// eye, both eyes, or several fields per eye, and the number of files on
+// disk doesn't map cleanly onto "exams" in the clinical sense.
 function render_patient_list(array $folders, $file) {
     if (empty($folders)) {
         echo "<div class='emptylist'>No patients found.</div>";
@@ -33,25 +38,16 @@ function render_patient_list(array $folders, $file) {
             $dt = DateTime::createFromFormat('Ymd', $info['dob']);
             if ($dt) $dobFmt = $dt->format('d-M-Y');
         }
-        echo "<div class='div_wrap'>";
-        echo "  <div class='div_pat'>";
-        echo "    <span class='namelabel'>" . htmlspecialchars($info['last']) . ", " . htmlspecialchars($info['first']) . "</span><br/>";
+        $count = count(list_patient_exams($folder));
+        $href  = htmlspecialchars($file) . "?id=" . urlencode($base);
+
+        echo "<a class='div_pat' href='$href'>";
+        echo "  <div class='row1'>";
+        echo "    <span class='namelabel'>" . htmlspecialchars($info['last']) . ", " . htmlspecialchars($info['first']) . "</span>";
         echo "    <span class='idlabel'>" . htmlspecialchars($dobFmt) . "</span>";
         echo "  </div>";
-
-        $exams = list_patient_exams($folder);
-        if (!empty($exams)) {
-            $href = htmlspecialchars($file) . "?id=" . urlencode($base);
-            echo "  <div class='div_list'>";
-            echo "    <a class='datepill' href='$href'>" . count($exams) . " exam" . (count($exams) === 1 ? '' : 's') . " &raquo;</a>";
-            // Show the most recent few labels as a hint
-            $hint = [];
-            foreach (array_slice($exams, 0, 4) as $ex) $hint[] = htmlspecialchars($ex['label']);
-            echo "    <span class='hint'>" . implode(' &middot; ', $hint) . (count($exams) > 4 ? ' &hellip;' : '') . "</span>";
-            echo "  </div>";
-        }
-        echo "</div>";
-        echo "<hr>";
+        echo "  <div class='countlabel'>$count report" . ($count === 1 ? '' : 's') . "</div>";
+        echo "</a>";
     }
 }
 
