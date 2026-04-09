@@ -33,35 +33,37 @@ function parse_folder($folderName) {
     ];
 }
 
-// Parse an exam basename. Returns null if it doesn't match.
+// Parse an exam basename by position, best-effort. The only hard
+// requirement is an 8-digit date in field [1] - the one field the HFA
+// is reliably not going to mangle. Everything else (time, eye, serial,
+// strategy) is extracted opportunistically with sensible defaults, so a
+// malformed time like "90014" (missing leading zero on the hour) or an
+// unfamiliar strategy code like "GPA" or "SITA" can't silently drop a
+// file from the sidebar or strip views.
 function parse_exam($basename) {
     $stem = pathinfo($basename, PATHINFO_FILENAME);
     $ext  = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
     if ($ext !== 'pdf' && $ext !== 'xml') return null;
 
-    // Notes on the field shapes:
-    //  - The strategy slot was originally locked to SCR|SFA because
-    //    every sample in D:\HVF_Data at build time used one of those
-    //    two. Zeiss Forum / HFA exports actually encode the report type
-    //    here and can emit others (GPA, SITA, SST, ONH, Overview, ...),
-    //    so this is now "any non-underscore token" and MD trend still
-    //    filters strictly to strategy === 'SFA'.
-    //  - The time slot was originally \d{6} but the HFA sometimes drops
-    //    the leading zero on the hour, so 09:00:14 lands on disk as
-    //    "90014" (5 chars) instead of "090014". Accept 5-or-6 digits
-    //    and left-pad to 6 below so every downstream use (exam_label,
-    //    sortkey, MD trend) still sees a clean HHMMSS.
-    $re = '/^(?<mrn>[^_]+)_(?<date>\d{8})_(?<time>\d{5,6})_(?<eye>OD|OS|OU)_(?<serial>[^_]+)_(?<strategy>[^_]+)(?:_(?<suffix>.*))?$/';
-    if (!preg_match($re, $stem, $m)) return null;
+    $parts = explode('_', $stem);
+    if (!isset($parts[1]) || !preg_match('/^\d{8}$/', $parts[1])) return null;
+
+    // Time: zero-to-six digits, left-padded to HHMMSS. If the slot is
+    // missing or garbage, fall back to midnight so the file still sorts
+    // after earlier same-date entries rather than disappearing.
+    $time = '000000';
+    if (isset($parts[2]) && preg_match('/^\d{1,6}$/', $parts[2])) {
+        $time = str_pad($parts[2], 6, '0', STR_PAD_LEFT);
+    }
 
     return [
-        'mrn'      => $m['mrn'],
-        'date'     => $m['date'],
-        'time'     => str_pad($m['time'], 6, '0', STR_PAD_LEFT),
-        'eye'      => $m['eye'],
-        'serial'   => $m['serial'],
-        'strategy' => $m['strategy'],
-        'suffix'   => $m['suffix'] ?? '',
+        'mrn'      => $parts[0] ?? '',
+        'date'     => $parts[1],
+        'time'     => $time,
+        'eye'      => $parts[3] ?? '',
+        'serial'   => $parts[4] ?? '',
+        'strategy' => $parts[5] ?? '',
+        'suffix'   => (count($parts) > 6) ? implode('_', array_slice($parts, 6)) : '',
         'stem'     => $stem,
         'ext'      => $ext,
     ];
@@ -92,15 +94,20 @@ function _list_ext($folderPath, $ext) {
     return $out;
 }
 
-// Folders that contain at least one PDF whose filename date field == today.
+// Folders that contain at least one PDF whose filename date field ==
+// today. Deliberately minimal - splits on '_' and checks field [1] and
+// nothing else. The HFA mangles time / strategy / eye codes from one
+// firmware version to the next but the date field has been stable
+// forever, and gating TODAY discovery on any of the other fields has
+// bitten us twice in one day already.
 function today_patients($path, $today) {
     $hits = [];
     $folders = glob(rtrim($path, "/\\") . '/*', GLOB_ONLYDIR);
     if (!is_array($folders)) return $hits;
     foreach ($folders as $f) {
         foreach (_list_ext($f, 'pdf') as $pdf) {
-            $info = parse_exam(basename($pdf));
-            if ($info && $info['date'] === $today) {
+            $parts = explode('_', pathinfo($pdf, PATHINFO_FILENAME));
+            if (isset($parts[1]) && $parts[1] === $today) {
                 $hits[] = $f;
                 break;
             }
