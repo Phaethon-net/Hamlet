@@ -39,21 +39,25 @@ function parse_exam($basename) {
     $ext  = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
     if ($ext !== 'pdf' && $ext !== 'xml') return null;
 
-    // The strategy field was locked to SCR|SFA when Hamlet was first
-    // written because every sample in D:\HVF_Data at the time used one
-    // of those two. In practice Zeiss Forum / HFA exports encode the
-    // *report type* here and can emit others (GPA, SITA, SST, ONH,
-    // Overview, etc.), so restrict only to "any non-underscore token"
-    // and let the downstream code decide what to do with it. MD trend
-    // still filters strictly to SFA; everything else just shows up in
-    // the sidebar and strip views like any normal exam.
-    $re = '/^(?<mrn>[^_]+)_(?<date>\d{8})_(?<time>\d{6})_(?<eye>OD|OS|OU)_(?<serial>[^_]+)_(?<strategy>[^_]+)(?:_(?<suffix>.*))?$/';
+    // Notes on the field shapes:
+    //  - The strategy slot was originally locked to SCR|SFA because
+    //    every sample in D:\HVF_Data at build time used one of those
+    //    two. Zeiss Forum / HFA exports actually encode the report type
+    //    here and can emit others (GPA, SITA, SST, ONH, Overview, ...),
+    //    so this is now "any non-underscore token" and MD trend still
+    //    filters strictly to strategy === 'SFA'.
+    //  - The time slot was originally \d{6} but the HFA sometimes drops
+    //    the leading zero on the hour, so 09:00:14 lands on disk as
+    //    "90014" (5 chars) instead of "090014". Accept 5-or-6 digits
+    //    and left-pad to 6 below so every downstream use (exam_label,
+    //    sortkey, MD trend) still sees a clean HHMMSS.
+    $re = '/^(?<mrn>[^_]+)_(?<date>\d{8})_(?<time>\d{5,6})_(?<eye>OD|OS|OU)_(?<serial>[^_]+)_(?<strategy>[^_]+)(?:_(?<suffix>.*))?$/';
     if (!preg_match($re, $stem, $m)) return null;
 
     return [
         'mrn'      => $m['mrn'],
         'date'     => $m['date'],
-        'time'     => $m['time'],
+        'time'     => str_pad($m['time'], 6, '0', STR_PAD_LEFT),
         'eye'      => $m['eye'],
         'serial'   => $m['serial'],
         'strategy' => $m['strategy'],
