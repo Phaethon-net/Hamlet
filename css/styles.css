@@ -317,6 +317,17 @@ a.div_pat .countlabel {
 }
 .menu-toolbar .mode-btn:hover,
 .menu-toolbar .menu-btn:hover { background: #024; }
+
+/* NB button flagged red when NB.txt exists for this patient. Keeps the
+   yellow border and text so it's still recognisably the NB control,
+   just with a clearly different fill demanding attention. */
+.menu-toolbar .menu-btn.has-nb {
+    background: #a01010;
+    border-color: #ffd84a;
+    color: #ffd84a;
+    font-weight: bold;
+}
+.menu-toolbar .menu-btn.has-nb:hover { background: #c01818; }
 .menu-toolbar .mode-btn.active {
     background: #024;
     color: #ffd84a;

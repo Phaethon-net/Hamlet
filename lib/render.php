@@ -117,8 +117,10 @@ function render_patient_detail($folder, $file, $dataURL, $idx, $view = 'dual') {
         $cls = ($view === $m) ? 'mode-btn active' : 'mode-btn';
         echo "    <a class='$cls' href='$base&amp;view=$m'>$label</a>";
     }
+    $hasNb = is_file($folder . DIRECTORY_SEPARATOR . 'NB.txt');
+    $nbCls = $hasNb ? 'menu-btn has-nb' : 'menu-btn';
     echo "    <button id='btn-md' class='menu-btn'>MD</button>";
-    echo "    <button id='btn-nb' class='menu-btn'>NB</button>";
+    echo "    <button id='btn-nb' class='$nbCls'>NB</button>";
     echo "  </div>";
     if (empty($exams)) {
         echo "  <div class='emptylist'>No exams.</div>";
