@@ -39,7 +39,15 @@ function parse_exam($basename) {
     $ext  = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
     if ($ext !== 'pdf' && $ext !== 'xml') return null;
 
-    $re = '/^(?<mrn>[^_]+)_(?<date>\d{8})_(?<time>\d{6})_(?<eye>OD|OS|OU)_(?<serial>[^_]+)_(?<strategy>SCR|SFA)(?:_(?<suffix>.*))?$/';
+    // The strategy field was locked to SCR|SFA when Hamlet was first
+    // written because every sample in D:\HVF_Data at the time used one
+    // of those two. In practice Zeiss Forum / HFA exports encode the
+    // *report type* here and can emit others (GPA, SITA, SST, ONH,
+    // Overview, etc.), so restrict only to "any non-underscore token"
+    // and let the downstream code decide what to do with it. MD trend
+    // still filters strictly to SFA; everything else just shows up in
+    // the sidebar and strip views like any normal exam.
+    $re = '/^(?<mrn>[^_]+)_(?<date>\d{8})_(?<time>\d{6})_(?<eye>OD|OS|OU)_(?<serial>[^_]+)_(?<strategy>[^_]+)(?:_(?<suffix>.*))?$/';
     if (!preg_match($re, $stem, $m)) return null;
 
     return [
