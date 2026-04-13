@@ -2,6 +2,14 @@
    menu + dual-pane PDF layout appended. No PView overlay, no viewer toggle,
    no thumbnail grid. */
 
+@font-face {
+    font-family: 'Great Vibes';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/GreatVibes-Regular.woff2') format('woff2');
+}
+
 html, body{
     height: 100%;
     border: 0;
@@ -151,7 +159,7 @@ span.idlabel{
 
 .title-script {
     font-size: 64pt;
-    font-family: 'Brush Script MT', cursive;
+    font-family: 'Great Vibes', cursive;
     color: #e4dd84;
 }
 
@@ -177,7 +185,7 @@ span.idlabel{
 
 .phaethon {
     font-size: 12pt;
-    font-family: 'Brush Script MT', cursive;
+    font-family: 'Great Vibes', cursive;
     color: yellow;
     text-align: center;
 }
