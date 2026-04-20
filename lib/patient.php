@@ -111,10 +111,15 @@ function today_patients($path, $today) {
         if (is_array($cached)) return $cached;
     }
 
+    // Pre-filter by folder mtime: only folders the OS touched today need an
+    // inner scan. On a large archive this reduces the PDF scan from O(all
+    // patients) to O(today's patients), which is typically single-digits.
+    $todayStart = mktime(0, 0, 0);
     $hits = [];
     $folders = glob(rtrim($path, "/\\") . '/*', GLOB_ONLYDIR);
     if (!is_array($folders)) return $hits;
     foreach ($folders as $f) {
+        if (filemtime($f) < $todayStart) continue;
         foreach (_list_ext($f, 'pdf') as $pdf) {
             $parts = explode('_', pathinfo($pdf, PATHINFO_FILENAME));
             if (isset($parts[1]) && $parts[1] === $today) {
